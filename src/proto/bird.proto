@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package bird;
+
+service BirdService {
+  // Get details of a specific bird
+  rpc GetBirdDetails (GetBirdRequest) returns (BirdResponse);
+
+  // Feed a bird
+  rpc FeedBird (FeedBirdRequest) returns (BirdResponse);
+
+  // Send a bird to scout
+  rpc ScoutBird (ScoutRequest) returns (ScoutResponse);
+
+  // Create a new bird (egg)
+  rpc CreateBird (CreateBirdRequest) returns (BirdResponse);
+
+  // Increment the evolved status of a bird
+  rpc IncrementEvolvedStatus (IncrementEvolvedStatusRequest) returns (BirdResponse);
+}
+
+message GetBirdRequest {
+  string bird_id = 1;
+}
+
+message BirdResponse {
+  string bird_id = 1;
+  string name = 2;
+  string personality = 3;
+  int32 hunger = 4;
+  int32 speed = 5;
+  int32 clumsiness = 6;
+  int32 evolved_status = 7; // Tracks how evolved the bird is (0 = egg, higher values = more evolved)
+}
+
+message FeedBirdRequest {
+  string bird_id = 1;
+  int32 food_amount = 2;
+}
+
+message ScoutRequest {
+  string bird_id = 1;
+  string target_roost_id = 2;
+}
+
+message ScoutResponse {
+  string status = 1;
+  string message = 2;
+}
+
+message CreateBirdRequest {
+  string name = 1;           // Name of the bird
+  string personality = 2;    // Initial personality of the bird
+}
+
+message IncrementEvolvedStatusRequest {
+  string bird_id = 1;        // The ID of the bird to evolve
+  int32 increment_value = 2; // How much to increment the evolved status
+}

@@ -1,0 +1,9 @@
+version: '3'
+services:
+  tvrbo-api:
+    build: .
+    ports:
+      - "50051:50051"
+    volumes:
+      - .:/app
+    command: npm start

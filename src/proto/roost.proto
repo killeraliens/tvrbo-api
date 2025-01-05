@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package roost;
+
+service RoostService {
+  // Get details of a specific roost
+  rpc GetRoostDetails (GetRoostRequest) returns (RoostResponse);
+
+  // Create a new roost
+  rpc CreateRoost (CreateRoostRequest) returns (RoostResponse);
+
+  // Assign a bird to a roost
+  rpc AssignBirdToRoost (AssignBirdRequest) returns (RoostResponse);
+}
+
+message GetRoostRequest {
+  string roost_id = 1;
+}
+
+message RoostResponse {
+  string roost_id = 1;
+  string player_id = 2;
+  string name = 3;
+  double latitude = 4;
+  double longitude = 5;
+  repeated string birds = 6; // List of bird IDs assigned to this roost
+}
+
+message CreateRoostRequest {
+  string player_id = 1;
+  string name = 2;
+  double latitude = 3;
+  double longitude = 4;
+}
+
+message AssignBirdRequest {
+  string roost_id = 1;
+  string bird_id = 2;
+}
