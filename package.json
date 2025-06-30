@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare:generated": "mkdir -p src/generated",
-    "proto:gen": "mkdir -p src/generated && npx grpc_tools_node_protoc --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --ts_out=src/generated --grpc_out=grpc_js:src/generated --proto_path=src/proto src/proto/*.proto",    
+    "proto:clean": "rm -rf src/generated",
+    "proto:gen": "mkdir -p src/generated && grpc_tools_node_protoc --plugin=protoc-gen-ts=$(which protoc-gen-ts) --js_out=import_style=commonjs,binary:./src/generated --grpc_out=grpc_js:./src/generated --ts_out=service=grpc-node:./src/generated --proto_path=./src/proto ./src/proto/*.proto",
     "start": "ts-node src/index.ts",
     "build": "tsc"
   },
@@ -21,9 +22,11 @@
     "@grpc/proto-loader": "^0.7.13",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
+    "jsonwebtoken": "^9.0.2",
     "typescript": "^5.7.2"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "grpc_tools_node_protoc_ts": "^5.3.3",
     "grpc-tools": "^1.12.4",
     "ts-node": "^10.9.2"
