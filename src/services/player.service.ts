@@ -1,39 +1,86 @@
-import { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
+import { ServerUnaryCall, sendUnaryData, status } from '@grpc/grpc-js';
 import { IPlayerServiceServer } from '../generated/player_grpc_pb';
 import {
     GetPlayerRequest,
     PlayerResponse,
     CreatePlayerRequest,
 } from '../generated/player_pb';
+import { keycloakMiddleware, AuthenticatedCall } from '../middleware/keycloak.middleware';
 
 export const playerService: IPlayerServiceServer = {
-    getPlayer: (
+    getPlayer: async (
         call: ServerUnaryCall<GetPlayerRequest, PlayerResponse>,
         callback: sendUnaryData<PlayerResponse>
     ) => {
-        const playerId = call.request.getPlayerId();
+        try {
+            // Authenticate the request
+            const isAuthenticated = await keycloakMiddleware.authenticate(call as AuthenticatedCall, callback);
+            if (!isAuthenticated) {
+                return;
+            }
 
-        // Mock response
-        const response = new PlayerResponse();
-        response.setPlayerId(playerId);
-        response.setUsername('MockUser');
-        response.setEmail('mockuser@example.com');
+            // Check if user has required role
+            if (!keycloakMiddleware.hasRole(call as AuthenticatedCall, 'player-read')) {
+                callback({
+                    code: status.PERMISSION_DENIED,
+                    message: 'Insufficient permissions'
+                });
+                return;
+            }
 
-        callback(null, response);
+            const playerId = call.request.getPlayerId();
+
+            // Mock response
+            const response = new PlayerResponse();
+            response.setPlayerId(playerId);
+            response.setUsername('MockUser');
+            response.setEmail('mockuser@example.com');
+
+            callback(null, response);
+        } catch (error) {
+            console.error('Error in getPlayer:', error);
+            callback({
+                code: status.INTERNAL,
+                message: 'Internal server error'
+            });
+        }
     },
 
-    createPlayer: (
+    createPlayer: async (
         call: ServerUnaryCall<CreatePlayerRequest, PlayerResponse>,
         callback: sendUnaryData<PlayerResponse>
     ) => {
-        const { getUsername, getEmail } = call.request;
+        try {
+            // Authenticate the request
+            const isAuthenticated = await keycloakMiddleware.authenticate(call as AuthenticatedCall, callback);
+            if (!isAuthenticated) {
+                return;
+            }
 
-        // Mock response
-        const response = new PlayerResponse();
-        response.setPlayerId('456'); // Mock ID
-        response.setUsername(getUsername());
-        response.setEmail(getEmail());
+            // Check if user has required role
+            if (!keycloakMiddleware.hasRole(call as AuthenticatedCall, 'player-create')) {
+                callback({
+                    code: status.PERMISSION_DENIED,
+                    message: 'Insufficient permissions'
+                });
+                return;
+            }
 
-        callback(null, response);
+            const { getUsername, getEmail } = call.request;
+
+            // Mock response
+            const response = new PlayerResponse();
+            response.setPlayerId('456');
+            response.setUsername(getUsername());
+            response.setEmail(getEmail());
+
+            callback(null, response);
+        } catch (error) {
+            console.error('Error in createPlayer:', error);
+            callback({
+                code: status.INTERNAL,
+                message: 'Internal server error'
+            });
+        }
     },
 };
